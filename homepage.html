@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="styles1.css">
+    <script type="module">
+        // Import Firebase services
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAiDMpNOBE2UdUeyigfyHQaUplXyOE8eiw",
+            authDomain: "perpusonlinego.firebaseapp.com",
+            databaseURL: "https://perpusonlinego-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "perpusonlinego",
+            storageBucket: "perpusonlinego.firebasestorage.app",
+            messagingSenderId: "922401745726",
+            appId: "1:922401745726:web:8d1a9e356eb0874431da6f",
+            measurementId: "G-FBW2EPMJXB"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Function to display book cards dynamically
+        function displayBooks() {
+            const booksRef = ref(database, 'books');
+
+            get(booksRef).then((snapshot) => {
+                const booksContainer = document.getElementById("booksContainer");
+                booksContainer.innerHTML = ''; // Clear existing cards
+
+                if (snapshot.exists()) {
+                    snapshot.forEach((book) => {
+                        const bookData = book.val();
+                        const bookId = book.key; // Get the book ID from Firebase
+
+                        const bookCard = document.createElement("div");
+                        bookCard.classList.add("card");
+                        bookCard.onclick = function () {
+                            // Redirect to showbook.html with book ID as URL parameter
+                            window.location.href = `showbook.html?id=${bookId}`;
+                        };
+
+                        bookCard.innerHTML = `
+                            <div class="card-title">${bookData.title}</div>
+                            <div class="card-username">${bookData.author}</div>
+                        `;
+                        booksContainer.appendChild(bookCard);
+                    });
+                } else {
+                    booksContainer.innerHTML = "<p>No books available</p>";
+                }
+            }).catch((error) => {
+                console.error("Error fetching books: ", error);
+            });
+        }
+
+        // Load books when the page is loaded
+        document.addEventListener("DOMContentLoaded", displayBooks);
+    </script>
+</head>
+<body>
+
+    <div class="content">
+        <h2>Selamat Datang</h2>
+        <p>di PERPUSON</p>
+
+        <!-- Book Cards Container -->
+        <div id="booksContainer" class="card-container"></div>
+
+        <!-- Add Button -->
+        <a href="addbook.html" class="add-button">Tambah</a>
+
+        <!-- Logout Button -->
+        <a href="login.html" class="logout-button">LOGOUT</a>
+    </div>
+
+</body>
+</html>

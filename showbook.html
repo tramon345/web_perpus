@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Buku</title>
+    <link rel="stylesheet" href="styles3.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAiDMpNOBE2UdUeyigfyHQaUplXyOE8eiw",
+            authDomain: "perpusonlinego.firebaseapp.com",
+            databaseURL: "https://perpusonlinego-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "perpusonlinego",
+            storageBucket: "perpusonlinego.appspot.com",
+            messagingSenderId: "922401745726",
+            appId: "1:922401745726:web:8d1a9e356eb0874431da6f",
+            measurementId: "G-FBW2EPMJXB"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookId = urlParams.get("id");
+
+            if (!bookId) {
+                alert("No book selected!");
+                window.location.href = "homepage.html";
+                return;
+            }
+
+            const bookRef = ref(database, `books/${bookId}`);
+
+            const loadingMessage = document.getElementById("loadingMessage");
+            loadingMessage.style.display = "block";
+
+            onValue(bookRef, (snapshot) => {
+                loadingMessage.style.display = "none";
+
+                if (snapshot.exists()) {
+                    const book = snapshot.val();
+
+                    document.getElementById("bookTitle").innerText = book.title || "Judul tidak tersedia";
+                    document.getElementById("bookAuthor").innerText = `${book.author || "Penulis tidak tersedia"}`;
+                    document.getElementById("bookDescription").innerText = book.description || "Deskripsi tidak tersedia";
+
+                    document.getElementById("editButton").onclick = function() {
+                        window.location.href = `edit.html?id=${bookId}`;
+                    };
+
+                    document.getElementById("deleteButton").onclick = function() {
+                        if (confirm("Are you sure you want to delete this book?")) {
+                            remove(bookRef)
+                                .then(() => {
+                                    alert("Book deleted successfully");
+                                    window.location.href = "homepage.html";
+                                })
+                                .catch((error) => {
+                                    console.error("Error deleting book: ", error);
+                                    alert("Error deleting book.");
+                                });
+                        }
+                    };
+                } else {
+                    alert("Book not found!");
+                    window.location.href = "homepage.html";
+                }
+            }, (error) => {
+                console.error("Error retrieving book details:", error);
+                alert("Error retrieving book details.");
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="content">
+        <h1>Detail Buku</h1>
+        <div id="loadingMessage" style="display: none; text-align: center;">Loading...</div>
+        
+        <div id="bookDetails">
+            <h3 id="bookTitle"></h3>
+            <p id="bookAuthor"></p>
+            <p id="bookDescription"></p>
+        </div>
+
+        <div class="buttons">
+            <button id="editButton">Edit</button>
+            <button id="deleteButton">Delete</button>
+            <button id="backButton" onclick="window.location.href = 'homepage.html';">Back</button>
+        </div>
+    </div>
+</body>
+</html>

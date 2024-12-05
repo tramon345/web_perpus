@@ -1,0 +1,176 @@
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    background-image: url('image/bckg2.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Container */
+.login-container {
+    background: #a2dab9;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Password wrapper */
+.password-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.password-wrapper input {
+    flex: 1;
+    padding-right: 40px; /* Memberi ruang untuk tombol */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Heading */
+h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Form group */
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Button */
+.login-button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+}
+
+.login-button:hover {
+    background-color: #0056b3;
+}
+
+/* Tombol Register */
+.register-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.register-button:hover {
+    background-color: #218838;
+}
+
+.Register-button1 {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.Register-button1:hover {
+    background-color: #0056b3;
+}
+
+p {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Homepage Styles */
+
+/* Search Bar Section */
+.search-bar-container {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    margin-top: 20px; /* Add some space at the top */
+}
+
+.search-bar-container input {
+    width: 50%; /* Set the width of the search bar */
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+/* Header with settings icon */
+.header {
+    display: flex;
+    justify-content: flex-start; /* Aligns to the left */
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+}
+
+/* Settings Icon */
+.settings-icon img {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+/* Content below header */
+.content {
+    padding: 20px;
+    background-color: #fff;
+    margin-top: 20px;
+}
