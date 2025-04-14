@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detail Buku</title>
-    <link rel="stylesheet" href="styles3.css">
+    <link rel="stylesheet" href="showstyels.css">
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+        import { getDatabase, ref, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
+        // Konfigurasi Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAiDMpNOBE2UdUeyigfyHQaUplXyOE8eiw",
             authDomain: "perpusonlinego.firebaseapp.com",
@@ -20,8 +23,14 @@
             measurementId: "G-FBW2EPMJXB"
         };
 
+        // Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        const auth = getAuth();
+
+        let currentUserId = null; // ID user yang login
+        let currentUsername = null; // Nama user yang login
+        let book = null; // Data buku yang diambil dari database
 
         document.addEventListener("DOMContentLoaded", () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -34,63 +43,116 @@
             }
 
             const bookRef = ref(database, `books/${bookId}`);
-
             const loadingMessage = document.getElementById("loadingMessage");
-            loadingMessage.style.display = "block";
+            const editButton = document.getElementById("editButton");
+            const deleteButton = document.getElementById("deleteButton");
 
-            onValue(bookRef, (snapshot) => {
-                loadingMessage.style.display = "none";
+            // Cek user yang login sebelum mengambil data buku
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUserId = user.uid;
 
-                if (snapshot.exists()) {
-                    const book = snapshot.val();
-
-                    document.getElementById("bookTitle").innerText = book.title || "Judul tidak tersedia";
-                    document.getElementById("bookAuthor").innerText = `${book.author || "Penulis tidak tersedia"}`;
-                    document.getElementById("bookDescription").innerText = book.description || "Deskripsi tidak tersedia";
-
-                    document.getElementById("editButton").onclick = function() {
-                        window.location.href = `edit.html?id=${bookId}`;
-                    };
-
-                    document.getElementById("deleteButton").onclick = function() {
-                        if (confirm("Are you sure you want to delete this book?")) {
-                            remove(bookRef)
-                                .then(() => {
-                                    alert("Book deleted successfully");
-                                    window.location.href = "homepage.html";
-                                })
-                                .catch((error) => {
-                                    console.error("Error deleting book: ", error);
-                                    alert("Error deleting book.");
-                                });
+                    // Ambil username user yang login
+                    get(ref(database, `users/${currentUserId}`)).then((snapshot) => {
+                        if (snapshot.exists()) {
+                            currentUsername = snapshot.val().username || "Tidak diketahui";
                         }
-                    };
+                    });
+
+                    // Ambil data buku dari Firebase
+                    onValue(bookRef, (snapshot) => {
+                        loadingMessage.style.display = "none";
+
+                        if (snapshot.exists()) {
+                            book = snapshot.val();
+
+                            // Ambil nama author terbaru dari tabel users
+                            get(ref(database, `users/${book.authorId}`)).then((userSnapshot) => {
+                                let authorName = "Penulis tidak tersedia";
+                                if (userSnapshot.exists()) {
+                                    authorName = userSnapshot.val().username || "Penulis tidak tersedia";
+                                }
+
+                                // Menampilkan informasi buku
+                                document.getElementById("bookTitle").innerText = book.title || "Judul tidak tersedia";
+                                document.getElementById("bookAuthor").innerText = `Penulis: ${authorName}`;
+                                document.getElementById("bookDescription").innerText = book.description || "Deskripsi tidak tersedia";
+                            });
+
+                            // Hanya tampilkan tombol jika user adalah penulisnya
+                            if (currentUserId === book.authorId) {
+                                editButton.style.display = "inline-block";
+                                deleteButton.style.display = "inline-block";
+                            } else {
+                                editButton.style.display = "none";
+                                deleteButton.style.display = "none";
+                            }
+                        } else {
+                            alert("Buku tidak ditemukan!");
+                            window.location.href = "homepage.html";
+                        }
+                    }, (error) => {
+                        console.error("Error mengambil detail buku:", error);
+                        alert("Error mengambil detail buku.");
+                    });
                 } else {
-                    alert("Book not found!");
-                    window.location.href = "homepage.html";
+                    alert("Anda harus login terlebih dahulu!");
+                    window.location.href = "login.html";
                 }
-            }, (error) => {
-                console.error("Error retrieving book details:", error);
-                alert("Error retrieving book details.");
             });
+
+            // Tombol Edit Buku
+            editButton.onclick = function () {
+                if (book && currentUserId === book.authorId) {
+                    window.location.href = `edit.html?id=${bookId}`;
+                } else {
+                    alert("Anda tidak memiliki izin untuk mengedit buku ini.");
+                }
+            };
+
+            // Tombol Hapus Buku
+            deleteButton.onclick = function () {
+                if (!book || currentUserId !== book.authorId) {
+                    alert("Anda tidak memiliki izin untuk menghapus buku ini.");
+                    return;
+                }
+
+                if (confirm("Apakah Anda yakin ingin menghapus buku ini?")) {
+                    remove(bookRef)
+                        .then(() => {
+                            alert("Buku berhasil dihapus");
+                            window.location.href = "homepage.html";
+                        })
+                        .catch((error) => {
+                            console.error("Gagal menghapus buku: ", error);
+                            alert("Gagal menghapus buku.");
+                        });
+                }
+            };
         });
+
     </script>
 </head>
 <body>
+    <div class="navbar">
+        <div class="navbar-title">PERPUSON</div>
+        <div class="button-container">
+            <button id="editButton" style="display: none;"><img src="image/edit.png" alt="Edit"></button>
+            <button id="deleteButton" style="display: none;"><img src="image/trash.png" alt="Delete"></button>
+            <button id="backButton" onclick="window.location.href = 'homepage.html';">
+                <img src="image/back-button.png" alt="Back">
+            </button>
+        </div>
+    </div>
+
     <div class="content">
         <h1>Detail Buku</h1>
-        <div id="loadingMessage" style="display: none; text-align: center;">Loading...</div>
+        <div id="loadingMessage" style="text-align: center;">Loading...</div>
         
         <div id="bookDetails">
             <h3 id="bookTitle"></h3>
             <p id="bookAuthor"></p>
             <p id="bookDescription"></p>
-        </div>
-
-        <div class="buttons">
-            <button id="editButton">Edit</button>
-            <button id="deleteButton">Delete</button>
-            <button id="backButton" onclick="window.location.href = 'homepage.html';">Back</button>
         </div>
     </div>
 </body>

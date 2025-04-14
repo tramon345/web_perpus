@@ -28,13 +28,30 @@ body {
     display: flex;
     align-items: center;
     position: relative;
+    width: 100%;
 }
 
 .password-wrapper input {
-    flex: 1;
-    padding-right: 40px; /* Memberi ruang untuk tombol */
+    width: 100%;
+    padding-right: 40px; /* Ruang untuk ikon */
+    font-size: 16px !important;
+    font-family: Arial, sans-serif !important;
+    letter-spacing: normal !important;
+    height: 40px; /* Pastikan ukuran tetap */
+    min-height: 40px;
+    box-sizing: border-box;
 }
 
+/* Jika tetap ingin monospace untuk password, gunakan juga untuk text */
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] {
+    font-family: monospace;
+    letter-spacing: normal;
+    height: 40px;
+    min-height: 40px;
+}
+
+/* Tombol toggle password */
 .toggle-password {
     position: absolute;
     right: 10px;
@@ -62,13 +79,22 @@ label {
     font-weight: bold;
 }
 
-input[type="text"], input[type="password"] {
+/* Perbaikan input email dan password */
+input[type="email"], input[type="password"] {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     margin: 5px 0;
-    border: 1px solid #ddd;
+    border: 2px solid #007BFF;
     border-radius: 4px;
     box-sizing: border-box;
+    font-size: 16px;
+    transition: border 0.3s, box-shadow 0.3s;
+}
+
+input[type="email"]:focus, input[type="password"]:focus {
+    border-color: #0056b3;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 91, 187, 0.5);
 }
 
 /* Button */
@@ -81,6 +107,7 @@ input[type="text"], input[type="password"] {
     cursor: pointer;
     width: 100%;
     font-size: 16px;
+    transition: 0.3s;
 }
 
 .login-button:hover {
@@ -98,12 +125,14 @@ input[type="text"], input[type="password"] {
     width: 100%;
     font-size: 16px;
     margin-top: 10px;
+    transition: 0.3s;
 }
 
 .register-button:hover {
     background-color: #218838;
 }
 
+/* Tombol Register di halaman Register */
 .Register-button1 {
     background-color: #28a745;
     color: white;
@@ -114,12 +143,14 @@ input[type="text"], input[type="password"] {
     width: 100%;
     font-size: 16px;
     margin-top: 10px;
+    transition: 0.3s;
 }
 
 .Register-button1:hover {
-    background-color: #0056b3;
+    background-color: #218838;
 }
 
+/* Link */
 p {
     margin-top: 15px;
     font-size: 14px;
@@ -141,11 +172,11 @@ a:hover {
     position: relative;
     width: 100%;
     text-align: center;
-    margin-top: 20px; /* Add some space at the top */
+    margin-top: 20px;
 }
 
 .search-bar-container input {
-    width: 50%; /* Set the width of the search bar */
+    width: 50%;
     padding: 10px;
     border-radius: 20px;
     border: 1px solid #ccc;
@@ -155,7 +186,7 @@ a:hover {
 /* Header with settings icon */
 .header {
     display: flex;
-    justify-content: flex-start; /* Aligns to the left */
+    justify-content: flex-start;
     padding: 10px 20px;
     background-color: #333;
     color: white;

@@ -1,16 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Buku</title>
-    <link rel="stylesheet" href="styles4.css">
-    <script type="module">
-        // Import Firebase services
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+    <link rel="stylesheet" href="editstyles.css">
+</head>
+<body>
 
-        // Firebase configuration
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="navbar-title">PERPUSON</div>
+        <img src="image/back-button.png" class="back-button" onclick="window.history.back();">
+    </div>
+
+    <div class="content">
+        <h1>Edit Buku</h1>
+        <div id="bookDetails">
+            <label for="bookTitle">Judul:</label>
+            <input type="text" id="bookTitle" placeholder="Masukkan judul buku" required>
+
+            <label for="bookAuthor">Penulis:</label>
+            <input type="text" id="bookAuthor" readonly>
+
+            <label for="bookType">Tipe Buku:</label>
+            <input type="text" id="bookType" readonly>
+
+            <label for="bookDescription">Deskripsi:</label>
+            <textarea id="bookDescription" placeholder="Masukkan deskripsi buku" required></textarea>
+
+            <button id="updateButton">Perbarui</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyAiDMpNOBE2UdUeyigfyHQaUplXyOE8eiw",
             authDomain: "perpusonlinego.firebaseapp.com",
@@ -22,80 +49,96 @@
             measurementId: "G-FBW2EPMJXB"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
         const database = getDatabase(app);
 
+        let currentUserId = null;
+
         document.addEventListener("DOMContentLoaded", () => {
-            // Get book ID from URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             const bookId = urlParams.get("id");
 
             if (!bookId) {
-                alert("No book selected!");
-                window.location.href = "homepage.html"; // Redirect if no ID is found
+                alert("Tidak ada buku yang dipilih!");
+                window.location.href = "homepage.html";
                 return;
             }
 
-            // Reference to the specific book in Firebase
-            const bookRef = ref(database, `books/${bookId}`);
-
-            // Fetch book data from Firebase and populate the form
-            onValue(bookRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const book = snapshot.val();
-
-                    // Populate form fields with existing data
-                    document.getElementById("bookTitle").value = book.title || "";
-                    document.getElementById("bookAuthor").value = book.author || "";
-                    document.getElementById("bookDescription").value = book.description || "";
-                } else {
-                    alert("Book not found!");
-                    window.location.href = "homepage.html"; // Redirect if book not found
+            onAuthStateChanged(auth, (user) => {
+                if (!user) {
+                    alert("Anda harus login untuk mengedit buku!");
+                    window.location.href = "login.html";
+                    return;
                 }
+
+                currentUserId = user.uid;
+
+                const bookRef = ref(database, `books/${bookId}`);
+                get(bookRef).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const book = snapshot.val();
+
+                        if (book.authorId !== currentUserId) {
+                            alert("Anda tidak memiliki izin untuk mengedit buku ini!");
+                            window.location.href = "homepage.html";
+                            return;
+                        }
+
+                        document.getElementById("bookTitle").value = book.title || "";
+                        document.getElementById("bookAuthor").value = book.author || "";
+                        document.getElementById("bookType").value = book.type || "";
+                        document.getElementById("bookDescription").value = book.description || "";
+
+                        autoResizeTextarea();
+                    } else {
+                        alert("Buku tidak ditemukan!");
+                        window.location.href = "homepage.html";
+                    }
+                }).catch((error) => {
+                    console.error("Gagal mengambil data buku:", error);
+                });
             });
 
-            // Handle form submission to update book data
-            document.getElementById("updateButton").onclick = function() {
-                const title = document.getElementById("bookTitle").value;
-                const author = document.getElementById("bookAuthor").value;
-                const description = document.getElementById("bookDescription").value;
+            document.getElementById("updateButton").onclick = function () {
+                const title = document.getElementById("bookTitle").value.trim();
+                const description = document.getElementById("bookDescription").value.trim();
 
-                if (title && author && description) {
-                    // Update the book in Firebase
-                    set(bookRef, {
-                        title: title,
-                        author: author,
-                        description: description
-                    }).then(() => {
-                        alert("Book updated successfully");
-                        window.location.href = "homepage.html"; // Redirect to homepage after update
-                    }).catch((error) => {
-                        console.error("Error updating book: ", error);
-                        alert("Error updating book.");
-                    });
-                } else {
-                    alert("Please fill all the fields.");
+                if (!title || !description) {
+                    alert("Mohon isi semua kolom.");
+                    return;
                 }
+
+                const bookRef = ref(database, `books/${bookId}`);
+
+                get(bookRef).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        update(bookRef, {
+                            title: title,
+                            description: description
+                        }).then(() => {
+                            alert("Buku berhasil diperbarui!");
+                            window.location.href = "homepage.html";
+                        }).catch((error) => {
+                            console.error("Gagal memperbarui buku:", error);
+                        });
+                    }
+                }).catch((error) => {
+                    console.error("Gagal mengambil data buku:", error);
+                });
             };
+
+            function autoResizeTextarea() {
+                const textarea = document.getElementById("bookDescription");
+                textarea.style.height = "auto";
+                textarea.style.height = textarea.scrollHeight + "px";
+            }
+
+            const textarea = document.getElementById("bookDescription");
+            textarea.addEventListener("input", autoResizeTextarea);
+            textarea.addEventListener("focus", autoResizeTextarea);
         });
     </script>
-</head>
-<body>
-    <div class="content">
-        <h1>Edit Buku</h1>
-        <div id="bookDetails">
-            <label for="bookTitle">Title:</label>
-            <input type="text" id="bookTitle" placeholder="Enter book title" required>
 
-            <label for="bookAuthor">Author:</label>
-            <input type="text" id="bookAuthor" placeholder="Enter author name" required>
-
-            <label for="bookDescription">Description:</label>
-            <textarea id="bookDescription" placeholder="Enter book description" required></textarea>
-
-            <button id="updateButton">Update</button>
-        </div>
-    </div>
 </body>
 </html>

@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REGISTER</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Register</title>
+    <link rel="stylesheet" href="log.css">
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
         import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -22,7 +21,6 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
         const auth = getAuth(app);
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -30,42 +28,24 @@
             const passwordInput = document.getElementById('password');
             togglePassword.addEventListener('click', () => {
                 passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
-                togglePassword.textContent = passwordInput.type === 'password' ? '👁' : '🙈';
+                togglePassword.textContent = passwordInput.type === 'password' ? '👁' : '🚫';
             });
 
             const registerForm = document.getElementById('registerForm');
             registerForm.addEventListener('submit', (event) => {
                 event.preventDefault();
 
-                const username = document.getElementById('username').value;
                 const email = document.getElementById('Email').value;
                 const password = document.getElementById('password').value;
 
                 createUserWithEmailAndPassword(auth, email, password)
-                    .then((userCredential) => {
-                        const user = userCredential.user;
-
-                        const userId = user.uid;
-
-                        const userData = {
-                            username: username,
-                            email: email,
-                            password: password
-                        };
-
-                        set(ref(database, 'users/' + userId), userData)
-                            .then(() => {
-                                alert('Berhasil Registrasi!');
-                                window.location.href = 'login.html';
-                            })
-                            .catch((error) => {
-                                console.error('Error registrasi:', error);
-                                alert('Registrasi gagal: ' + error.message);
-                            });
+                    .then(() => {
+                        alert("Registrasi berhasil!");
+                        window.location.href = 'login.html'; // Redirect ke halaman login
                     })
                     .catch((error) => {
-                        console.error('Error creating user:', error);
-                        alert('Registration failed: ' + error.message);
+                        console.error('Register error:', error);
+                        alert('Registrasi gagal: ' + error.message);
                     });
             });
         });
@@ -76,13 +56,10 @@
         <h1>REGISTER</h1>
         <form id="registerForm">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Masukkan Username" required>
-            </div>
-            <div class="form-group">
                 <label for="Email">Email</label>
-                <input type="text" id="Email" name="Email" placeholder="Masukkan Email" required>
+                <input type="email" id="Email" name="Email" placeholder="Masukkan Email" required>
             </div>
+
             <div class="form-group">
                 <label for="password">Password</label>
                 <div class="password-wrapper">
@@ -90,7 +67,8 @@
                     <button type="button" id="toggle-password" class="toggle-password">👁</button>
                 </div>
             </div>
-            <button type="submit" class="Register-button1">REGISTER</button>
+
+            <button type="submit" class="register-button">REGISTER</button>
         </form>
     </div>
 </body>

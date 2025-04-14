@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Login</title>
+    <link rel="stylesheet" href="log.css">
     <script type="module">
-        // Import Firebase v9 modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAiDMpNOBE2UdUeyigfyHQaUplXyOE8eiw",
             authDomain: "perpusonlinego.firebaseapp.com",
@@ -22,56 +20,35 @@
             measurementId: "G-FBW2EPMJXB"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        const auth = getAuth(app);
 
-        // Toggle Password Visibility
         document.addEventListener("DOMContentLoaded", () => {
             const togglePassword = document.getElementById('toggle-password');
             const passwordInput = document.getElementById('password');
             togglePassword.addEventListener('click', () => {
                 passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
-                togglePassword.textContent = passwordInput.type === 'password' ? '👁' : '🙈';
+                togglePassword.textContent = passwordInput.type === 'password' ? '👁' : '🚫';
             });
 
-            // Login Form Handler
             const loginForm = document.getElementById('loginForm');
             loginForm.addEventListener('submit', (event) => {
                 event.preventDefault();
 
-                const username = document.getElementById('username').value;
                 const email = document.getElementById('Email').value;
                 const password = document.getElementById('password').value;
 
-                // Checking the database for matching user credentials
-                const usersRef = ref(database, 'users');
-                get(usersRef)
-                    .then((snapshot) => {
-                        let userFound = false;
-
-                        snapshot.forEach((childSnapshot) => {
-                            const userData = childSnapshot.val();
-
-                            // Match email and password
-                            if (userData.email === email && userData.password === password) {
-                                userFound = true;
-                                alert(`Welcome back, ${userData.username}!`);
-                                window.location.href = 'homepage.html'; // Redirect to homepage
-                            }
-                        });
-
-                        if (!userFound) {
-                            alert('Invalid email or password.');
-                        }
+                signInWithEmailAndPassword(auth, email, password)
+                    .then(() => {
+                        alert("Login berhasil!");
+                        window.location.href = 'homepage.html';
                     })
                     .catch((error) => {
-                        console.error('Error during login:', error);
-                        alert('Login failed: ' + error.message);
+                        console.error('Login error:', error);
+                        alert('Login gagal: ' + error.message);
                     });
             });
 
-            // Redirect to Register page
             window.redirectToRegister = function() {
                 window.location.href = 'register.html';
             };
@@ -82,19 +59,11 @@
     <div class="login-container">
         <h1>LOGIN</h1>
         <form id="loginForm">
-            <!-- Username input -->
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Masukkan Username" required>
-            </div>
-
-            <!-- Email input -->
             <div class="form-group">
                 <label for="Email">Email</label>
-                <input type="text" id="Email" name="Email" placeholder="Masukkan Email" required>
+                <input type="email" id="Email" name="Email" placeholder="Masukkan Email" required>
             </div>
 
-            <!-- Password input with toggle visibility -->
             <div class="form-group">
                 <label for="password">Password</label>
                 <div class="password-wrapper">
@@ -103,12 +72,9 @@
                 </div>
             </div>
 
-            <!-- Login button -->
             <button type="submit" class="login-button">Login</button>
         </form>
-        <p>Lupa password? <a href="#">Lupa Password</a></p>
-        <!-- Register Button -->
-        <button class="register-button" onclick="redirectToRegister()">Register</button>
+        <button class="register-button" onclick="redirectToRegister()">REGISTER</button>
     </div>
 </body>
 </html>

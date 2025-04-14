@@ -1,101 +1,117 @@
-/* General Styles */
-body {
-    font-family: Arial, sans-serif;
+/* Reset CSS */
+* {
     margin: 0;
     padding: 0;
-    background-image: url('image/bckg2.png');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
-/* Content */
-.content {
-    position: relative;
+/* Body */
+body {
+    background-color: white;
+}
+
+/* Header */
+.header {
+    background-color: #2ecc71;
     padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    margin: 80px 50px 20px; /* Adjust margins: 80px top, 50px left and right */
-    max-width: calc(100% - 100px); /* Subtract the 50px on the left and right */
     text-align: center;
-}
-
-.content h2 {
-    color: #333;
-}
-
-.content p {
-    color: #666;
-}
-
-/* Card Container (Vertically Stacked) */
-.card-container {
-    display: flex;
-    flex-direction: column; /* Stack cards vertically */
-    gap: 20px; /* Space between each card */
-    align-items: center; /* Align cards to the center horizontally */
-    margin-top: 20px;
-    width: 100%; /* Make the card container fill the width of the content */
-}
-
-/* Card */
-.card {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 80%; /* Set the card width to be a percentage of the container */
-    padding: 15px;
-    text-align: left;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
-}
-
-.card-title {
-    font-size: 18px;
+    font-size: 28px;
     font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
+    color: #aef2d5;
 }
 
-.card-username {
-    font-size: 14px;
-    color: #666;
+/* Search Bar */
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
 }
 
-/* Add Button */
-/* General Button Styling */
-.add-button, .logout-button {
-    background-color: #4CAF50; /* Green background for Add */
+.search-box {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 20px;
+    padding: 5px 10px;
+    width: 60%;
+    max-width: 500px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.search-box input {
+    border: none;
+    outline: none;
+    padding: 10px;
+    font-size: 16px;
+    flex: 1;
+    border-radius: 20px;
+}
+
+.search-box button {
+    background: black;
     color: white;
     border: none;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    border-radius: 5px;
+    border-radius: 50%;
+    padding: 10px;
     cursor: pointer;
+    position: absolute;
+    left: -35px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Card Container */
+.card-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-top: 20px;
-    margin-right: 10px; /* Space between the buttons */
+    padding: 10px;
 }
 
-/* Change color for hover */
-.add-button:hover, .logout-button:hover {
-    background-color: #45a049;
+/* Card Style */
+.card {
+    width: 90%;
+    max-width: 800px;
+    height: 120px;
+    background: gray;
+    border-radius: 10px;
+    margin: 10px 0;
+    padding: 15px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-/* Style for the logout button to make it red */
+/* Card Hover Effect */
+.card:hover {
+    transform: scale(1.05);
+    background-color: #bbbbbb;
+}
+
+/* Button Styles */
+.add-button, .logout-button {
+    display: block;
+    width: 150px;
+    text-align: center;
+    padding: 10px;
+    margin: 20px auto;
+    border-radius: 20px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+
+.add-button {
+    background-color: #3498db;
+}
+
 .logout-button {
-    background-color: #f44336; /* Red background for Logout */
-}
-
-.logout-button:hover {
-    background-color: #e53935; /* Darker red on hover */
+    background-color: #e74c3c;
 }

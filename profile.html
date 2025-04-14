@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PROFIL</title>
+  <link rel="stylesheet" href="profile.css" />
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="navbar-left">
+      <div class="user-info">
+        <div class="username-container">
+          <b id="username">Memuat...</b>
+          <input type="text" id="edit-username-input" />
+          <button id="editUsername">
+            <img src="image/edit.png" alt="Edit" />
+          </button>
+          <button id="saveUsername">
+            <img src="image/save.png" alt="Save" />
+          </button>
+        </div>
+        <h3 id="email">Memuat...</h3>
+      </div>
+    </div>
+
+    <span class="title">PERPUSON</span>
+
+    <div class="navbar-right">
+      <button id="backButton" onclick="window.location.href = 'homepage.html';">
+        <img src="image/back-button.png" alt="Back" />
+      </button>
+      <button id="logoutButton">
+        <img src="image/off.png" alt="Logout" />
+      </button>
+    </div>
+  </div>
+
+  <div class="profile-card">
+    <h2>Buku yang Kamu Buat:</h2>
+  </div>
+
+  <div id="bookList" class="card-container">
+    <p>Sedang memuat buku...</p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAiDMpNOBE2UdUeyigfyHQaUplXyOE8eiw",
+      authDomain: "perpusonlinego.firebaseapp.com",
+      databaseURL: "https://perpusonlinego-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "perpusonlinego",
+      storageBucket: "perpusonlinego.appspot.com",
+      messagingSenderId: "922401745726",
+      appId: "1:922401745726:web:8d1a9e356eb0874431da6f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+
+    let currentUserId = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUserId = user.uid;
+        document.getElementById("email").textContent = user.email;
+
+        const userRef = ref(database, 'users/' + currentUserId);
+        get(userRef).then((snapshot) => {
+          if (snapshot.exists()) {
+            const username = snapshot.val().username || "Tidak ada username";
+            document.getElementById("username").textContent = username;
+          }
+        });
+
+        loadUserBooks(currentUserId);
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+
+    const usernameEl = document.getElementById("username");
+    const usernameInput = document.getElementById("edit-username-input");
+    const editButton = document.getElementById("editUsername");
+    const saveButton = document.getElementById("saveUsername");
+    const logoutButton = document.getElementById("logoutButton");
+
+    function enableEditing() {
+      usernameInput.value = usernameEl.textContent;
+      usernameEl.style.display = "none";
+      usernameInput.style.display = "block";
+      usernameInput.focus();
+      saveButton.style.display = "inline-block";
+    }
+
+    function disableEditing() {
+      usernameEl.style.display = "block";
+      usernameInput.style.display = "none";
+      saveButton.style.display = "none";
+    }
+
+    function saveUsername() {
+      const newUsername = usernameInput.value.trim();
+      if (newUsername && currentUserId) {
+        set(ref(database, "users/" + currentUserId + "/username"), newUsername)
+          .then(() => {
+            usernameEl.textContent = newUsername;
+            alert("Username berhasil diperbarui!");
+            updateBooksAuthor(currentUserId, newUsername);
+          })
+          .catch((error) => {
+            console.error("Gagal memperbarui username:", error);
+            alert("Terjadi kesalahan saat memperbarui username.");
+          });
+      }
+      disableEditing();
+    }
+
+    function updateBooksAuthor(userId, newUsername) {
+      const booksRef = ref(database, "books");
+      get(booksRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          const books = snapshot.val();
+          Object.keys(books).forEach((bookId) => {
+            if (books[bookId].authorId === userId) {
+              update(ref(database, `books/${bookId}`), { author: newUsername })
+                .catch((error) => console.error("Gagal memperbarui nama author:", error));
+            }
+          });
+        }
+      }).catch((error) => {
+        console.error("Gagal mengambil data buku:", error);
+      });
+    }
+
+    function loadUserBooks(userId) {
+      const booksRef = ref(database, "books");
+      const bookListEl = document.getElementById("bookList");
+
+      bookListEl.innerHTML = "<p>Sedang memuat buku...</p>";
+
+      get(booksRef).then((snapshot) => {
+        bookListEl.innerHTML = "";
+
+        if (snapshot.exists()) {
+          const books = snapshot.val();
+          const userBooks = Object.entries(books).filter(([id, book]) => book.authorId === userId);
+
+          if (userBooks.length === 0) {
+            bookListEl.innerHTML = "<p>Kamu belum membuat buku apa pun.</p>";
+            return;
+          }
+
+          userBooks.forEach(([id, book]) => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+              <div class="card-image">
+                <img src="${book.imageUrl || 'image/placeholder.jpg'}" alt="Book Cover">
+              </div>
+              <div class="card-info">
+                <div class="card-title">${book.title}</div>
+                <div class="card-author">Penulis: ${book.author}</div>
+              </div>
+            `;
+            card.addEventListener("click", () => {
+              window.location.href = `showbook.html?id=${id}`;
+            });
+            bookListEl.appendChild(card);
+          });
+        } else {
+          bookListEl.innerHTML = "<p>Tidak ada data buku ditemukan.</p>";
+        }
+      }).catch((error) => {
+        console.error("Gagal mengambil data buku:", error);
+        bookListEl.innerHTML = "<p>Terjadi kesalahan saat mengambil data.</p>";
+      });
+    }
+
+    editButton.addEventListener("click", enableEditing);
+    saveButton.addEventListener("click", saveUsername);
+    usernameInput.addEventListener("keypress", (event) => {
+      if (event.key === "Enter") saveUsername();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!usernameInput.contains(event.target) &&
+          !editButton.contains(event.target) &&
+          !saveButton.contains(event.target)) {
+        disableEditing();
+      }
+    });
+
+    logoutButton.addEventListener("click", () => {
+      signOut(auth).then(() => {
+        alert("Logout berhasil!");
+        window.location.href = "login.html";
+      }).catch((error) => {
+        console.error("Gagal logout:", error);
+        alert("Terjadi kesalahan saat logout.");
+      });
+    });
+  </script>
+
+</body>
+</html>
