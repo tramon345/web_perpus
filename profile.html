@@ -200,7 +200,7 @@
     logoutButton.addEventListener("click", () => {
       signOut(auth).then(() => {
         alert("Logout berhasil!");
-        window.location.href = "login.html";
+        window.location.href = "index.html";
       }).catch((error) => {
         console.error("Gagal logout:", error);
         alert("Terjadi kesalahan saat logout.");
